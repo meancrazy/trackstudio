@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="teamcitytrackstudio" default="pack">
+
+    <property file="build.properties"/>
+    <property name="plugin.name" value="trackstudio"/>
+
+    <!-- Compiler options -->
+
+    <property name="compiler.debug" value="on"/>
+    <property name="compiler.generate.no.warnings" value="off"/>
+    <property name="compiler.args" value=""/>
+    <property name="compiler.max.memory" value="128m"/>
+    <patternset id="ignored.files">
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/SCCS/**"/>
+        <exclude name="**/RCS/**"/>
+        <exclude name="**/rcs/**"/>
+        <exclude name="**/.DS_Store/**"/>
+        <exclude name="**/.svn/**"/>
+        <exclude name="**/.pyc/**"/>
+        <exclude name="**/.pyo/**"/>
+        <exclude name="**/*.pyc/**"/>
+        <exclude name="**/*.pyo/**"/>
+        <exclude name="**/.git/**"/>
+        <exclude name="**/*.hprof/**"/>
+        <exclude name="**/_svn/**"/>
+        <exclude name="**/.hg/**"/>
+    </patternset>
+    <patternset id="library.patterns">
+        <include name="*.zip"/>
+        <include name="*.war"/>
+        <include name="*.egg"/>
+        <include name="*.ear"/>
+        <include name="*.swc"/>
+        <include name="*.jar"/>
+    </patternset>
+    <patternset id="compiler.resources">
+        <include name="**/?*.properties"/>
+        <include name="**/?*.xml"/>
+        <include name="**/?*.gif"/>
+        <include name="**/?*.png"/>
+        <include name="**/?*.jpeg"/>
+        <include name="**/?*.jpg"/>
+        <include name="**/?*.html"/>
+        <include name="**/?*.dtd"/>
+        <include name="**/?*.tld"/>
+        <include name="**/?*.jsp"/>
+        <include name="**/?*.css"/>
+        <include name="**/?*.html"/>
+        <include name="**/?*.htm"/>
+        <include name="**/?*.ftl"/>
+        <include name="**/?*.exe"/>
+        <include name="**/?*.pdb"/>
+        <include name="**/?*.dll"/>
+        <include name="**/?*.config"/>
+    </patternset>
+
+    <!-- Project Libraries -->
+
+    <path id="library.teamcity_internals.classpath">
+        <pathelement location="${teamcity.path}/webapps/ROOT/WEB-INF/lib/server.jar"/>
+    </path>
+
+    <path id="library.teamcity_open_api_common.classpath">
+        <pathelement location="${teamcity.path}/devPackage/common-api.jar"/>
+    </path>
+
+    <path id="library.teamcity_open_api_server.classpath">
+        <pathelement location="${teamcity.path}/devPackage/server-api.jar"/>
+    </path>
+
+    <path id="library.teamcity_third-party.classpath">
+        <pathelement location="${teamcity.path}/webapps/ROOT/WEB-INF/lib/annotations.jar"/>
+        <pathelement location="${teamcity.path}/webapps/ROOT/WEB-INF/lib/commons-httpclient-3.1.jar"/>
+        <pathelement location="${teamcity.path}/webapps/ROOT/WEB-INF/lib/commons-logging.jar"/>
+        <pathelement location="${teamcity.path}/webapps/ROOT/WEB-INF/lib/ehcache-1.6.0-patch.jar"/>
+        <pathelement location="${teamcity.path}/webapps/ROOT/WEB-INF/lib/ehcache-1.6.0.jar"/>
+        <pathelement location="${teamcity.path}/webapps/ROOT/WEB-INF/lib/jdom.jar"/>
+        <pathelement location="${teamcity.path}/webapps/ROOT/WEB-INF/lib/gson-1.7.1.jar"/>
+        <pathelement location="${teamcity.path}/webapps/ROOT/WEB-INF/lib/openapi.jar"/>
+        <pathelement location="${teamcity.path}/webapps/ROOT/WEB-INF/lib/spring-webmvc.jar"/>
+        <pathelement location="${teamcity.path}/webapps/ROOT/WEB-INF/lib/spring.jar"/>
+        <pathelement location="${teamcity.path}/webapps/ROOT/WEB-INF/lib/util.jar"/>
+    </path>
+
+    <path id="library.tomcat.classpath">
+        <pathelement location="${teamcity.path}/lib/servlet-api.jar"/>
+    </path>
+
+    <!-- Module -->
+
+    <dirname property="module.basedir" file="${ant.file}"/>
+    <property name="compiler.args.server" value="${compiler.args}"/>
+
+    <property name="output.dir" value="${module.basedir}/bin"/>
+    <property name="unpacked.dir" value="${output.dir}/unpacked"/>
+    <property name="classes.dir" value="${module.basedir}/out"/>
+
+    <path id="module.classpath">
+        <path refid="library.teamcity_third-party.classpath"/>
+        <path refid="library.teamcity_open_api_common.classpath"/>
+        <path refid="library.teamcity_open_api_server.classpath"/>
+        <path refid="library.tomcat.classpath"/>
+        <path refid="library.teamcity_internals.classpath"/>
+    </path>
+
+    <path id="module.sourcepath">
+        <dirset dir="${module.basedir}">
+            <include name="src"/>
+            <include name="resources"/>
+        </dirset>
+    </path>
+
+    <target name="clean" description="Cleanup all">
+        <delete dir="${output.dir}"/>
+    </target>
+
+    <target name="prepare">
+        <delete dir="${output.dir}"/>
+        <delete dir="${classes.dir}"/>
+        <mkdir dir="${unpacked.dir}/server"/>
+        <mkdir dir="${classes.dir}"/>
+    </target>
+
+    <target name="compile" depends="clean,prepare">
+        <javac destdir="${classes.dir}"
+               debug="${compiler.debug}"
+               nowarn="${compiler.generate.no.warnings}"
+               memorymaximumsize="${compiler.max.memory}"
+               fork="true">
+            <compilerarg line="${compiler.args.server}"/>
+            <classpath refid="module.classpath"/>
+            <src refid="module.sourcepath"/>
+            <patternset refid="ignored.files"/>
+        </javac>
+
+        <copy todir="${classes.dir}">
+            <fileset dir="${module.basedir}/src">
+                <patternset refid="compiler.resources"/>
+                <type type="file"/>
+            </fileset>
+            <fileset dir="${module.basedir}/resources">
+                <patternset refid="compiler.resources"/>
+                <type type="file"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="jar" depends="compile">
+        <jar destfile="${unpacked.dir}/server/${plugin.name}.jar">
+            <fileset dir="${classes.dir}"/>
+        </jar>
+    </target>
+
+    <target name="pack" depends="jar">
+        <copy todir="${unpacked.dir}">
+            <fileset file="${module.basedir}/teamcity-plugin.xml"/>
+        </copy>
+        <delete file="${output.dir}/${plugin.name}.zip"/>
+        <zip destfile="${output.dir}/${plugin.name}.zip">
+            <fileset dir="${unpacked.dir}"/>
+        </zip>
+    </target>
+</project>
