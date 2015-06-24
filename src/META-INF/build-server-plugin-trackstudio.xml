@@ -4,10 +4,12 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans-2.0.xsd"
        default-autowire="constructor">
-    <bean id="trackStudioProviderFactory" class="ru.sang.trackstudio.TrackStudioProviderFactory">
-        <constructor-arg index="0" ref="trackStudioIssueFetcher"/>
-    </bean>
     <bean id="trackStudioIssueFetcher" class="ru.sang.trackstudio.TrackStudioIssueFetcher">
         <constructor-arg index="0" ref="ehCacheUtil"/>
+    </bean>
+    <bean id="trackStudioIssueProviderType" class="ru.sang.trackstudio.TrackStudioIssueProviderType"/>
+    <bean id="trackStudioProviderFactory" class="ru.sang.trackstudio.TrackStudioProviderFactory">
+        <constructor-arg index="0" ref="trackStudioIssueProviderType"/>
+        <constructor-arg index="1" ref="trackStudioIssueFetcher"/>
     </bean>
 </beans>

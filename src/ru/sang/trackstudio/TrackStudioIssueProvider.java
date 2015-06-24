@@ -3,6 +3,7 @@ package ru.sang.trackstudio;
 
 import jetbrains.buildServer.issueTracker.AbstractIssueProvider;
 import jetbrains.buildServer.issueTracker.IssueFetcher;
+import jetbrains.buildServer.issueTracker.IssueProviderType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,8 +15,8 @@ public class TrackStudioIssueProvider extends AbstractIssueProvider {
 
     //private final static Log LOGGER = LogFactory.getLog(TrackStudioIssueProvider.class);
 
-    public TrackStudioIssueProvider(@NotNull IssueFetcher fetcher) {
-        super("trackstudio", fetcher);
+    public TrackStudioIssueProvider(@NotNull final IssueProviderType type, @NotNull IssueFetcher fetcher) {
+        super(type.getType(), fetcher);
     }
 
     @NotNull
